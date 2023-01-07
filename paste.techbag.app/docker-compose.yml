@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  privatebin:
+    image: privatebin/nginx-fpm-alpine:1.5.1
+    read_only: true 
+    volumes:
+      - './privatebin-data:/srv/data'
+      - './conf.php:/srv/cfg/conf.php:ro'
+    networks:
+      - traefik
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.paste-redirect-web-secure.redirectscheme.scheme=https
+      - traefik.http.routers.paste-web.middlewares=mywebserver-redirect-web-secure
+      - traefik.http.routers.paste-web.rule=Host(`paste.techbag.app`)
+      - traefik.http.routers.paste-web.entrypoints=http
+      - traefik.http.middlewares.paste-redirect-web-secure.redirectscheme.permanent=true
+      - traefik.http.routers.paste-web-secure.rule=Host(`paste.techbag.app`)
+      - traefik.http.routers.paste-web-secure.tls.certresolver=mytlschallenge
+      - traefik.http.routers.paste-web-secure.tls=true
+      - traefik.http.routers.paste-web-secure.entrypoints=https
+      - traefik.http.services.paste-web-secure.loadbalancer.server.port=8080    
+networks:
+  traefik:
+    name: traefik
+    external: true
