@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  traefik:
+    image: traefik:2.9
+    container_name: traefik
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./config/:/etc/traefik/config/:ro
+      - .traefik_ssl:/letsencrypt
+    command :
+    - "--entryPoints.web.forwardedHeaders.insecure"
+    - "--entryPoints.websecure.forwardedHeaders.insecure"
+    networks:
+      - traefik
+      
+networks:
+  traefik:
+    name: traefik
